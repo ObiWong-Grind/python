@@ -15,6 +15,7 @@
 """
 
 import sys, re
+from tools.handle_response import *
 
 MENU_1 = """
 ========= 导航命令 =========
@@ -58,6 +59,7 @@ class DiagramsClientView:
         :param sockfd:
         """
         self.__sockfd = sockfd
+        self.__tools = HandleResponse()
         self.__user_id = None
         self.__user_name = None
         self.__o_diagram = ""
@@ -116,12 +118,14 @@ class DiagramsClientView:
             随机数起卦
         """
         request = input("请输入您的求问内容：")
-        request_data = "REQUEST /%s##--##%s##--##%s##--##None##--##None##--##%s FTP/1.0" % (self.__user_id, self.__user_name, option_key, request)
+        request_data = "REQUEST / FTP/1.0\r\nUser_Id: %s\nUser_Name: %s\nOption_Key: %s\r\n\r\n%s" % (self.__user_id, self.__user_name, option_key, request)
         self.__sockfd.send(request_data.encode())
-        response = self.__sockfd.recv(256).decode()
-        pattern = r"(\S+),(\S+),(\S+),(\S+)"
-        self.__o_diagram, self.__f_diagram, self.__s_diagram, self.__t_diagram = re.findall(pattern, response)[0]
-        self.__create_dict()
+        response = self.__sockfd.recv(512).decode()
+        response_code, response_info, response_head = self.__tools.handle_response_info(response)
+        if response_code == "100" and response_info == "FOUR_DIAGRAMS":
+            self.__o_diagram, self.__f_diagram, self.__s_diagram, self.__t_diagram = self.__tools.handle_diagrams(
+                response_head)
+            self.__create_dict()
 
     def __choice_number_diagrams(self, option_key):
         """
@@ -130,12 +134,13 @@ class DiagramsClientView:
         request = input("请输入您的求问内容：")
         number01 = self.__input_number()
         number02 = self.__input_number()
-        request_data = "REQUEST /%s##--##%s##--##%s##--##%s##--##%s##--##%s FTP/1.0" % (self.__user_id, self.__user_name, option_key, number01, number02, request)
+        request_data = "REQUEST / FTP/1.0\r\nUser_Id: %s\nUser_Name: %s\nOption_Key: %s\nNumber_One: %s\nNumber_Two: %s\r\n\r\n%s" % (self.__user_id, self.__user_name, option_key, number01, number02, request)
         self.__sockfd.send(request_data.encode())
-        response = self.__sockfd.recv(256).decode()
-        pattern = r"(\S+),(\S+),(\S+),(\S+)"
-        self.__o_diagram, self.__f_diagram, self.__s_diagram, self.__t_diagram = re.findall(pattern, response)[0]
-        self.__create_dict()
+        response = self.__sockfd.recv(512).decode()
+        response_code, response_info, response_head = self.__tools.handle_response_info(response)
+        if response_code == "100" and response_info == "FOUR_DIAGRAMS":
+            self.__o_diagram, self.__f_diagram, self.__s_diagram, self.__t_diagram = self.__tools.handle_diagrams(response_head)
+            self.__create_dict()
 
     def __input_number(self):
         """
@@ -217,13 +222,13 @@ class DiagramsClientView:
         """
         password = self.__input_password()
         user_name = self.__input_user_name()
-        request_data = "SELECT /%s,%s,%s FTP/1.0" % (phone, password, user_name)
+        request_data = "SELECT / FTP/1.0\r\nPhone: %s\nPassword: %s\nUser_Name: %s\r\n\r\n" % (phone, password, user_name)
         self.__sockfd.send(request_data.encode())
-        response = self.__sockfd.recv(256).decode()
-        response_data = response.split(" ")
-        if response_data[1] == "200":  # 注册成功
+        response = self.__sockfd.recv(512).decode()
+        response_code, response_info, response_head = self.__tools.handle_response_info(response)
+        if response_code == "200" and response_info == "OK":  # 注册成功
             print("注册成功！")
-            self.__extract(response_data[-1])  # 提取返回的用户id和昵称
+            self.__extract(response_head)  # 提取返回的用户id和昵称
             self.__do_play()
         else:
             print("未知异常！")
@@ -235,23 +240,22 @@ class DiagramsClientView:
         """
         while True:
             phone = input("请输入手机号：")
-            request_data = "SIGN /%s FTP/1.0" % phone
+            request_data = "SIGN / FTP/1.0\r\nPhone: %s\r\n\r\n" % phone
             self.__sockfd.send(request_data.encode())
-            response = self.__sockfd.recv(256).decode()
-            response_data = response.split(" ")
-            if response_data[1] == "200" and response_data[-1] == "OK":  # 如果返回 200 和 OK 手机未注册
+            response = self.__sockfd.recv(512).decode()
+            response_code, response_info, response_head = self.__tools.handle_response_info(response)
+            if response_code == "200" and response_info == "OK":  # 如果返回 200 和 OK 手机未注册
                 self.__over_sign(phone)
-            elif response_data[1] == "402" and response_data[-1] == "HAVE_PHONE":
+            elif response_code == "402" and response_info == "HAVE_PHONE":
                 print("该手机号已被注册！")
 
-    def __extract(self, msg):
+    def __extract(self, response_head):
         """
             提取用户id及昵称
-        :param msg:
+        :param response_head:
         :return: id, 用户名
         """
-        pattern = r"(\S+)#(\S+)#(\S+)"
-        result1, self.__user_id, self.__user_name = re.findall(pattern, msg)[0]
+        self.__user_id, self.__user_name = self.__tools.handle_id_and_name(response_head)
 
     def __do_login(self):
         """
@@ -260,15 +264,15 @@ class DiagramsClientView:
         while True:
             account = input("请输入账号：")
             password = input("请输入密码：")
-            request_data = "LOGIN /%s,%s FTP/1.0" % (account, password)
+            request_data = "LOGIN / FTP/1.0\r\nAccount: %s\nPassword: %s\r\n\r\n" % (account, password)
             self.__sockfd.send(request_data.encode())
-            response = self.__sockfd.recv(256).decode()
-            response_data = response.split(" ")
-            if response_data[1] == "200":  # 如果返回 200 账号密码正确
+            response = self.__sockfd.recv(512).decode()
+            response_code, response_info, response_head = self.__tools.handle_response_info(response)
+            if response_code == "200" and response_info == "OK":  # 如果返回 200 账号密码正确
                 print("登录成功！")
-                self.__extract(response_data[-1])
+                self.__extract(response_head)
                 self.__do_play()
-            elif response_data[1] == "401" and response_data[-1] == "ACCOUNT_OR_PASSWD_ERROR":
+            elif response_code == "401" and response_info == "ACCOUNT_OR_PASSWD_ERROR":
                 print("账号或密码有误，请重新输入！")
 
     def input_cmd(self):

@@ -171,7 +171,7 @@ class DiagramsController:
         s_diagram = "".join(self.__second_diagram())
         t_diagram = "".join(self.__third_diagram())
         self.__insert_sql(f_diagram, s_diagram, t_diagram)
-        return "%s,%s,%s,%s" % (self.__o_diagram, f_diagram, s_diagram, t_diagram)
+        return self.__o_diagram, f_diagram, s_diagram, t_diagram
 
 
 

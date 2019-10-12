@@ -10,10 +10,11 @@
         }
 """
 
-import random, sys, re
+import random, sys
 from core.diagrams_bll import *
 from multiprocessing import Process
 from login_and_sign.sign import *
+from tools.handle_request import *
 
 
 class DiagramsView(Process):
@@ -31,6 +32,7 @@ class DiagramsView(Process):
         self._connfd = connfd
         self._addr = addr
         self._login = DiagramLogin()
+        self._tools = HandleRequest()
         super().__init__()
 
     def __random_diagrams(self, user_id, user_name, option_key, request):
@@ -41,43 +43,43 @@ class DiagramsView(Process):
         :param option_key: 键值
         :param request: 求问问题
         """
-        tuple_result = DiagramsController(random.randint(0, 100), random.randint(0, 100), user_id, user_name, option_key, request).output()
-        self._connfd.send(tuple_result.encode())
+        o_diagram, f_diagram, s_diagram, t_diagram = DiagramsController(random.randint(0, 100), random.randint(0, 100), user_id, user_name, option_key, request).output()
+        msg = "FTP/1.0 100 FOUR_DIAGRAMS\r\nO_Diagram: %s\nF_Diagram: %s\nS_Diagram: %s\nT_Diagram: %s\r\n\r\n" % (o_diagram, f_diagram, s_diagram, t_diagram)
+        self._connfd.send(msg.encode())
 
     def __choice_number_diagrams(self, number01, number02, user_id, user_name, option_key, request):
         """
             报数起卦
         """
-        tuple_result = DiagramsController(number01, number02, user_id, user_name, option_key, request).output()
-        self._connfd.send(tuple_result.encode())
+        o_diagram, f_diagram, s_diagram, t_diagram = DiagramsController(number01, number02, user_id, user_name, option_key, request).output()
+        msg = "FTP/1.0 100 FOUR_DIAGRAMS\r\nO_Diagram: %s\nF_Diagram: %s\nS_Diagram: %s\nT_Diagram: %s\r\n\r\n" % (o_diagram, f_diagram, s_diagram, t_diagram)
+        self._connfd.send(msg.encode())
 
-    def __handle_diagrams_request(self, msg):
+    def __handle_diagrams_request(self, request_head, request_content):
         """
-            处理卦的请
-        :param msg: 请求信息
+            处理请卦的请求
+        :param request_head: 请求头
+        :param request_content: 请求体
         """
-        pattern = r"(\S+)##--##(\S+)##--##(\S+)##--##(\S+)##--##(\S+)##--##(\S+)"
-        user_id, user_name, option_key, number01, number02, request = re.findall(pattern, msg)[0]
+        user_id, user_name, option_key, number_one, number_two = self._tools.handle_request(request_head)
         if option_key == "1":
-            number01 = number02 = None
-            self.__random_diagrams(int(user_id), user_name, option_key, request)
+            self.__random_diagrams(int(user_id), user_name, option_key, request_content)
         elif option_key == "2":
-            self.__choice_number_diagrams(int(number01), int(number02), int(user_id), user_name, option_key, request)
+            self.__choice_number_diagrams(int(number_one), int(number_two), int(user_id), user_name, option_key, request_content)
 
-    def __select_sign(self, msg):
+    def __select_sign(self, request_head):
         """
             完成注册，将新用户信息插入数据库
-        :param msg:
+        :param request_head: 请求头
         """
-        pattern = r"(\S+),(\S+),(\S+)"
-        phone, password, user_name_ = re.findall(pattern, msg)[0]
+        phone, password, user_name = self._tools.handle_select_request(request_head)
         result = DiagramSign(phone)
-        res = result.insert_user(password, user_name_)
+        res = result.insert_user(password, user_name)
         if res:
-            msg = "FTP/1.0 200 OK#%s#%s" % (res[0], res[1])
+            msg = "FTP/1.0 200 OK\r\nUser_Id: %s\nUser_Name: %s\r\n\r\n" % (res[0], res[1])
             self._connfd.send(msg.encode())
         else:
-            self._connfd.send(b"FTP/1.0 403 ERROR")
+            self._connfd.send(b"FTP/1.0 403 ERROR\r\n\r\n\r\n")
 
     def __do_process_exit(self):
         """
@@ -86,30 +88,30 @@ class DiagramsView(Process):
         self._connfd.close()
         sys.exit("%s, %s Exit Handler" % self._addr)
 
-    def __do_sign(self, phone):
+    def __do_sign(self, request_head):
         """
             验证手机号是否被注册
-        :param phone: 手机号
+        :param request_head: 请求头
         """
+        phone = self._tools.handle_sign_request(request_head)
         result = DiagramSign(phone).select_phone()
         if result:
-            self._connfd.send(b"FTP/1.0 200 OK")
+            self._connfd.send(b"FTP/1.0 200 OK\r\n\r\n\r\n")
         else:
-            self._connfd.send(b"FTP/1.0 402 HAVE_PHONE")
+            self._connfd.send(b"FTP/1.0 402 HAVE_PHONE\r\n\r\n\r\n")
 
-    def __do_login(self, msg):
+    def __do_login(self, request_head):
         """
             登录
-        :param msg: 提取出的信息
+        :param request_head: 请求头
         """
-        pattern = r"(\S+),(\S+)"
-        account, password = re.findall(pattern, msg)[0]
+        account, password = self._tools.handle_login_request(request_head)
         result = self._login.match_login_info(account, password)
         if result:
-            msg = "FTP/1.0 200 OK#%s#%s" % (result[0], result[1])
+            msg = "FTP/1.0 200 OK\r\nUser_Id: %s\nUser_Name: %s\r\n\r\n" % (result[0], result[1])
             self._connfd.send(msg.encode())
         else:
-            self._connfd.send(b"FTP/1.0 401 ACCOUNT_OR_PASSWD_ERROR")
+            self._connfd.send(b"FTP/1.0 401 ACCOUNT_OR_PASSWD_ERROR\r\n\r\n\r\n")
 
     def run(self):
         """
@@ -117,22 +119,20 @@ class DiagramsView(Process):
         """
         while True:
             request_data = self._connfd.recv(4096).decode()  # 阻塞等待请求
-            request = request_data.split(" ")  # 按切割请求
-            if not request or request[0] == "EXIT":
+            if not request_data:
                 self.__do_process_exit()
-            elif request[0] == "LOGIN":  # 当用户请求登录时
-                msg = request[1].lstrip("/")
-                self.__do_login(msg)
-            elif request[0] == "SIGN":  # 当用户请求注册时
-                phone = request[1].lstrip("/")
-                self.__do_sign(phone)
-            elif request[0] == "SELECT":  # 完成注册插入新的用户数据
-                msg = request[1].lstrip("/")
-                self.__select_sign(msg)
-            elif request[0] == "REQUEST":  # 当用户请求请卦时
-                msg = request[1].lstrip("/")
-                self.__handle_diagrams_request(msg)
-            elif request[0] == "HISTORY":  # 当用户请求历史记录时
+            request_row, request_head, request_content = self._tools.handle_request_info(request_data)
+            if request_row == "EXIT":
+                self.__do_process_exit()
+            elif request_row == "LOGIN":  # 当用户请求登录时
+                self.__do_login(request_head)
+            elif request_row == "SIGN":  # 当用户请求注册时
+                self.__do_sign(request_head)
+            elif request_row == "SELECT":  # 完成注册插入新的用户数据
+                self.__select_sign(request_head)
+            elif request_row == "REQUEST":  # 当用户请求请卦时
+                self.__handle_diagrams_request(request_head, request_content)
+            elif request_row == "HISTORY":  # 当用户请求历史记录时
                 pass
 
 
