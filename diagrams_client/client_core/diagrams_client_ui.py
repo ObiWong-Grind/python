@@ -14,7 +14,7 @@
     完整响应协议 'FTP/1.0 200 OK\r\nUser_Id:1\nUser_Name:xxxxx\r\n\r\n请求内容'
 """
 
-import sys, re
+import sys
 from tools.handle_response import *
 
 MENU_1 = """
@@ -206,14 +206,14 @@ class DiagramsClientView:
             输入昵称
             后续加验证
         """
-        return input("请输入昵称:")
+        return input("请输入昵称：")
 
     def __input_password(self):
         """
             输入密码
             后续加验证
         """
-        return input("请输入密码:")
+        return input("请输入密码：")
 
     def __over_sign(self, phone):
         """

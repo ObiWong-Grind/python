@@ -2,8 +2,6 @@
     响应处理
 """
 
-res = "FTP/1.0 402 HAVE_PHONE\r\n\r\n\r\n"
-
 
 class HandleResponse:
     @staticmethod

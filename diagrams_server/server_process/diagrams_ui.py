@@ -4,10 +4,10 @@
     把这个模块重构为和客户端交互的入口
 
     {
-            "本卦": "%s" % f_diagram,
-            "互卦": "%s" % s_diagram,
-            "变卦": "%s" % t_diagram,
-        }
+        "本卦": "%s" % f_diagram,
+        "互卦": "%s" % s_diagram,
+        "变卦": "%s" % t_diagram,
+    }
 """
 
 import random, sys

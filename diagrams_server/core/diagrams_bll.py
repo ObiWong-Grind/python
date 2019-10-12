@@ -25,7 +25,7 @@ class DiagramsController:
         """
             链接数据库
         """
-        self.db = pymysql.connect(host="localhost", port=3306, user="root", password="r0260zgmf", database="diagrams", charset="utf8")
+        self.db = pymysql.connect(host="localhost", port=3306, user="root", password="122336978", database="diagrams", charset="utf8")
         self.cur = self.db.cursor()
 
     def __record_original_diagram(self, target_list):
