@@ -20,7 +20,7 @@ class DiagramLogin:
         """
             启动数据库
         """
-        self._db = pymysql.connect(host="localhost", port=3306, user="root", password="********", database="diagrams",
+        self._db = pymysql.connect(host="localhost", port=3306, user="root", password="122336978", database="diagrams",
                                    charset="utf8")
         self._cur = self._db.cursor()
 
