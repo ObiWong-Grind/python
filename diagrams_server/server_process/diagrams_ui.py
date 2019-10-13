@@ -113,6 +113,13 @@ class DiagramsView(Process):
         else:
             self._connfd.send(b"FTP/1.0 401 ACCOUNT_OR_PASSWD_ERROR\r\n\r\n\r\n")
 
+    def __handle_history(self, request_head):
+        """
+            处理查询历史
+        :param request_head: 请求头
+        """
+        pass
+
     def run(self):
         """
             循环接收请求，按照协议内容执行相应方法
@@ -133,6 +140,8 @@ class DiagramsView(Process):
             elif request_row == "REQUEST":  # 当用户请求请卦时
                 self.__handle_diagrams_request(request_head, request_content)
             elif request_row == "HISTORY":  # 当用户请求历史记录时
+                self.__handle_history(request_head)
+            elif request_row == "HISTORY_ID":  # 用户请求历史记录ID
                 pass
 
 

@@ -182,6 +182,13 @@ class DiagramsClientView:
             elif cmd.strip() == "3":
                 self.__do_play()
 
+    def __history(self):
+        """
+            查看历史
+        """
+        request_data = "HISTORY / FTP/1.0\r\nUser_Id: %s\nUser_Name: %s\r\n\r\n" % (self.__user_id, self.__user_name)
+        # self.__sockfd.send(request_data.encode())
+
     def __do_play(self):
         """
             选择起卦、查看历史、关闭
@@ -195,7 +202,7 @@ class DiagramsClientView:
             if cmd.strip() == "1":
                 self.__request_diagram()
             elif cmd.strip() == "2":
-                pass
+                self.__history()
             elif cmd.strip() == "Q" or cmd.strip() == "q":
                 self.__do_exit()
             else:
