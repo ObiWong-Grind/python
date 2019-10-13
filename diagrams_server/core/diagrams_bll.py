@@ -1,5 +1,6 @@
 """
     Python 以面向对象的方式做梅花排卦核心, 纯粹是个人练习
+    历史记录列表传输内容 '[{id: 1, option_key: 1, request: xxxxx, o_diagram: 111111, f_diagram: 111111, s_diagram: 111111, t_diagram: 111111, request_time: 2019-10-09 09:20:19},{},{},...{}]'
 """
 
 import pymysql
@@ -11,6 +12,15 @@ class DiagramsController:
         卦爻划分
     """
     def __init__(self, number01, number02, user_id, user_name, option_key, request):
+        """
+            初始化
+        :param number01: 数字1
+        :param number02: 数字2
+        :param user_id: 用户ID
+        :param user_name: 用户昵称
+        :param option_key: 键值
+        :param request: 求问的问题
+        """
         self.__yao = YaoModel()
         self.__number_one = number01
         self.__number_two = number02
@@ -167,11 +177,16 @@ class DiagramsController:
             self.db.close()
 
     def output(self):
+        """
+            卦值输出
+        :return: 原本卦, 本卦待变爻, 互卦, 变卦
+        """
         f_diagram = "".join(self.__first_diagram())
         s_diagram = "".join(self.__second_diagram())
         t_diagram = "".join(self.__third_diagram())
         self.__insert_sql(f_diagram, s_diagram, t_diagram)
         return self.__o_diagram, f_diagram, s_diagram, t_diagram
+
 
 
 

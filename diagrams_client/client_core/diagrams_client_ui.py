@@ -49,14 +49,14 @@ yin_change = "- - x"
 
 class DiagramsClientView:
     """
-        FTP客户端控制器
+        FTP客户端视图
     """
     count = 0
 
     def __init__(self, sockfd):
         """
-            套接字
-        :param sockfd:
+            初始化
+        :param sockfd: 套接字
         """
         self.__sockfd = sockfd
         self.__tools = HandleResponse()
@@ -229,7 +229,7 @@ class DiagramsClientView:
         """
         password = self.__input_password()
         user_name = self.__input_user_name()
-        request_data = "SELECT / FTP/1.0\r\nPhone: %s\nPassword: %s\nUser_Name: %s\r\n\r\n" % (phone, password, user_name)
+        request_data = "INSERT / FTP/1.0\r\nPhone: %s\nPassword: %s\nUser_Name: %s\r\n\r\n" % (phone, password, user_name)
         self.__sockfd.send(request_data.encode())
         response = self.__sockfd.recv(512).decode()
         response_code, response_info, response_head = self.__tools.handle_response_info(response)

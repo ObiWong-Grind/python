@@ -36,6 +36,9 @@ class DiagramClient:
         ftp.input_cmd()
 
     def main(self):
+        """
+            入口
+        """
         self.__link_server()
 
 

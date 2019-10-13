@@ -67,12 +67,12 @@ class DiagramsView(Process):
         elif option_key == "2":
             self.__choice_number_diagrams(int(number_one), int(number_two), int(user_id), user_name, option_key, request_content)
 
-    def __select_sign(self, request_head):
+    def __insert_new_user(self, request_head):
         """
             完成注册，将新用户信息插入数据库
         :param request_head: 请求头
         """
-        phone, password, user_name = self._tools.handle_select_request(request_head)
+        phone, password, user_name = self._tools.handle_insert(request_head)
         result = DiagramSign(phone)
         res = result.insert_user(password, user_name)
         if res:
@@ -93,7 +93,7 @@ class DiagramsView(Process):
             验证手机号是否被注册
         :param request_head: 请求头
         """
-        phone = self._tools.handle_sign_request(request_head)
+        phone = self._tools.handle_sign(request_head)
         result = DiagramSign(phone).select_phone()
         if result:
             self._connfd.send(b"FTP/1.0 200 OK\r\n\r\n\r\n")
@@ -105,7 +105,7 @@ class DiagramsView(Process):
             登录
         :param request_head: 请求头
         """
-        account, password = self._tools.handle_login_request(request_head)
+        account, password = self._tools.handle_login(request_head)
         result = self._login.match_login_info(account, password)
         if result:
             msg = "FTP/1.0 200 OK\r\nUser_Id: %s\nUser_Name: %s\r\n\r\n" % (result[0], result[1])
@@ -135,8 +135,8 @@ class DiagramsView(Process):
                 self.__do_login(request_head)
             elif request_row == "SIGN":  # 当用户请求注册时
                 self.__do_sign(request_head)
-            elif request_row == "SELECT":  # 完成注册插入新的用户数据
-                self.__select_sign(request_head)
+            elif request_row == "INSERT":  # 完成注册插入新的用户数据
+                self.__insert_new_user(request_head)
             elif request_row == "REQUEST":  # 当用户请求请卦时
                 self.__handle_diagrams_request(request_head, request_content)
             elif request_row == "HISTORY":  # 当用户请求历史记录时

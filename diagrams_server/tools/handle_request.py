@@ -4,6 +4,9 @@
 
 
 class HandleRequest:
+    """
+        请求处理工具类
+    """
     @staticmethod
     def handle_request(request_head):
         """
@@ -24,9 +27,8 @@ class HandleRequest:
             number_two = request[4].lstrip("Number_Two: ")
             return user_id, user_name, option_key, number_one, number_two
 
-
     @staticmethod
-    def handle_select_request(request_head):
+    def handle_insert(request_head):
         """
             处理注册时用户信息录入请求
         :param request_head: 请求头
@@ -39,7 +41,7 @@ class HandleRequest:
         return phone, password, user_name
 
     @staticmethod
-    def handle_sign_request(request_head):
+    def handle_sign(request_head):
         """
             处理注册请求
         :param request_head: 注册请求头
@@ -48,7 +50,7 @@ class HandleRequest:
         return request_head.lstrip("Phone: ")
 
     @staticmethod
-    def handle_login_request(request_head):
+    def handle_login(request_head):
         """
             处理登录请求
         :param request_head: 登录请求头
@@ -72,7 +74,7 @@ class HandleRequest:
             return request_row[0], request[1], None
         elif request_row[0] == "SIGN":
             return request_row[0], request[1], None
-        elif request_row[0] == "SELECT":
+        elif request_row[0] == "INSERT":
             return request_row[0], request[1], None
         elif request_row[0] == "REQUEST":
             return request_row[0], request[1], request[3]

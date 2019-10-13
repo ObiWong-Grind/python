@@ -19,7 +19,7 @@ class DiagramsSocket:
     """
     def __init__(self):
         """
-            初始化TCP链接套接字
+            初始化TCP套接字
         """
         self._sockfd = socket()  # 创建tcp套接字
         self._sockfd.setsockopt(SOL_SOCKET, SO_REUSEADDR, True)  # 设置套接字端口立即重用
@@ -34,7 +34,7 @@ class DiagramsSocket:
         """
         str_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())  # 将时间元组 --> str
         log = "%s | %s\n" % (str_time, text)
-        with open("log.txt", "a") as f:
+        with open("log.txt", "a+") as f:
             f.write(log)
 
     def __found_process(self):

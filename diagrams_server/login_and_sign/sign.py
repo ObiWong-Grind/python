@@ -7,7 +7,14 @@ from login_and_sign.login import *
 
 
 class DiagramSign:
+    """
+        注册
+    """
     def __init__(self, phone):
+        """
+            初始化
+        :param phone: 手机号
+        """
         self._phone = phone
         self._login = DiagramLogin()
         self.__connect_db()
@@ -16,11 +23,13 @@ class DiagramSign:
         """
             启动数据库
         """
-        self._db = pymysql.connect(host="localhost", port=3306, user="root", password="122336978", database="diagrams",
-                                   charset="utf8")
+        self._db = pymysql.connect(host="localhost", port=3306, user="root", password="122336978", database="diagrams", charset="utf8")
         self._cur = self._db.cursor()
 
     def __close_db(self):
+        """
+            数据库关闭
+        """
         self._cur.close()
         self._db.close()
 

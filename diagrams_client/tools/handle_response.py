@@ -4,6 +4,9 @@
 
 
 class HandleResponse:
+    """
+        响应处理工具类
+    """
     @staticmethod
     def handle_diagrams(response_head):
         """
