@@ -139,7 +139,7 @@ class DiagramsView(Process):
                 self.__insert_new_user(request_head)
             elif request_row == "REQUEST":  # 当用户请求请卦时
                 self.__handle_diagrams_request(request_head, request_content)
-            elif request_row == "HISTORY":  # 当用户请求历史记录时
+            elif request_row == "HISTORY":  # 当用户请求历史记录列表时
                 self.__handle_history(request_head)
             elif request_row == "HISTORY_ID":  # 用户请求历史记录ID
                 pass
