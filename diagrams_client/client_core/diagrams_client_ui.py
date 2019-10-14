@@ -123,8 +123,7 @@ class DiagramsClientView:
         response = self.__sockfd.recv(512).decode()
         response_code, response_info, response_head = self.__tools.handle_response_info(response)
         if response_code == "100" and response_info == "FOUR_DIAGRAMS":
-            self.__o_diagram, self.__f_diagram, self.__s_diagram, self.__t_diagram = self.__tools.handle_diagrams(
-                response_head)
+            self.__o_diagram, self.__f_diagram, self.__s_diagram, self.__t_diagram = self.__tools.handle_diagrams(response_head)
             self.__create_dict()
 
     def __choice_number_diagrams(self, option_key):
