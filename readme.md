@@ -1,3 +1,7 @@
+# diagrams v1.2.0
+
+1. 部分结构调整
+
 # diagrams v1.0.0
 
 ## 功能

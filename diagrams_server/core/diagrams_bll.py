@@ -3,8 +3,9 @@
     历史记录列表传输内容 '[{id: 1, option_key: 1, request: xxxxx, o_diagram: 111111, f_diagram: 111111, s_diagram: 111111, t_diagram: 111111, request_time: 2019-10-09 09:20:19},{},{},...{}]'
 """
 
-import pymysql
+
 from core.diagrams_model import *
+from core.operation_db import *
 
 
 class DiagramsController:
@@ -28,15 +29,8 @@ class DiagramsController:
         self.__user_name = user_name
         self.__option_key = option_key
         self.__request = request
-        self.__connect_db()
         self.__o_diagram = ""
-
-    def __connect_db(self):
-        """
-            链接数据库
-        """
-        self.db = pymysql.connect(host="localhost", port=3306, user="root", password="122336978", database="diagrams", charset="utf8")
-        self.cur = self.db.cursor()
+        self.__connect_db = OperationDB()
 
     def __record_original_diagram(self, target_list):
         """
@@ -158,24 +152,6 @@ class DiagramsController:
         else:
             target_list[indexes] = self.__yao.yang_yao
 
-    def __insert_sql(self, f_diagram, s_diagram, t_diagram):
-        """
-            插入数据库
-        :param f_diagram: 本卦
-        :param s_diagram: 互卦
-        :param t_diagram: 变卦
-        """
-        try:
-            sql = "insert into three_diagrams (user_id,user_name,option_key,request,o_diagram,f_diagram,s_diagram,t_diagram) values (%s,%s,%s,%s,%s,%s,%s,%s);"
-            self.cur.execute(sql, [self.__user_id, self.__user_name, self.__option_key, self.__request, self.__o_diagram, f_diagram, s_diagram, t_diagram])
-            self.db.commit()
-        except Exception as e:
-            self.db.rollback()
-            print(e)
-        finally:
-            self.cur.close()
-            self.db.close()
-
     def output(self):
         """
             卦值输出
@@ -184,7 +160,7 @@ class DiagramsController:
         f_diagram = "".join(self.__first_diagram())
         s_diagram = "".join(self.__second_diagram())
         t_diagram = "".join(self.__third_diagram())
-        self.__insert_sql(f_diagram, s_diagram, t_diagram)
+        self.__connect_db.insert_history(self.__user_id, self.__user_name, self.__option_key, self.__request, self.__o_diagram, f_diagram, s_diagram, t_diagram)
         return self.__o_diagram, f_diagram, s_diagram, t_diagram
 
 

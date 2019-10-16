@@ -35,11 +35,9 @@ class HandleRequest:
         :return: phone 账户手机号 str; password 密码 str; user_name 用户昵称 str
         """
         request = request_head.split("\n")
-        print(request)
         phone = request[0].split(" ")[1]
         password = request[1].split(" ")[1]
         user_name = request[2].split(" ")[1]
-        print("501", user_name)
         return phone, password, user_name
 
     @staticmethod

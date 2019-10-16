@@ -14,7 +14,7 @@
     完整响应协议 'FTP/1.0 200 OK\r\nUser_Id:1\nUser_Name:xxxxx\r\n\r\n请求内容'
 """
 
-import sys
+import sys, getpass
 from tools.handle_response import *
 
 MENU_1 = """
@@ -219,7 +219,8 @@ class DiagramsClientView:
             输入密码
             后续要做加格式验证
         """
-        return input("请输入密码：")
+        pwd = getpass.getpass("请输入密码：")
+        return pwd
 
     def __over_sign(self, phone):
         """
@@ -269,7 +270,7 @@ class DiagramsClientView:
         """
         while True:
             account = input("请输入账号：")
-            password = input("请输入密码：")
+            password = getpass.getpass("请输入密码：")
             request_data = "LOGIN / FTP/1.0\r\nAccount: %s\nPassword: %s\r\n\r\n" % (account, password)
             self.__sockfd.send(request_data.encode())
             response = self.__sockfd.recv(512).decode()
