@@ -217,7 +217,7 @@ class DiagramsClientView:
     def __input_password(self):
         """
             输入密码
-            后续加验证
+            后续要做加格式验证
         """
         return input("请输入密码：")
 

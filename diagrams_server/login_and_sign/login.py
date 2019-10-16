@@ -4,6 +4,7 @@
 
 
 import pymysql
+from tools.passwd import *
 
 
 class DiagramLogin:
@@ -23,7 +24,7 @@ class DiagramLogin:
         self._db = pymysql.connect(host="localhost", port=3306, user="root", password="122336978", database="diagrams", charset="utf8")
         self._cur = self._db.cursor()
 
-    def __login_time(self, user_id):
+    def select_login_time(self, user_id):
         """
             修改上线时间
         :param user_id: 用户id
@@ -34,21 +35,22 @@ class DiagramLogin:
             self._db.commit()
         except Exception as e:
             self._db.rollback()
-            print(e)
+            print("2", e)
         finally:
             self._cur.close()
             self._db.close()
 
-    def match_login_info(self, account, password):
+    def select_login_info(self, account, password):
         """
             使用账号、密码通过sql语句执行 匹配账号密码是否正确
         """
+        password = PassWordHash().hashpasswd(account, password)
         sql = "select id,user_name from user where account_phone=%s and password=%s limit 1;"
         self._cur.execute(sql, [account, password])
         data = self._cur.fetchone()
         if data:  # 如果 data 有返回值
-            self.__login_time(data[0])  # 修改用户上线时间
-            return data
+            self.select_login_time(data[0])  # 修改用户上线时间
+            return data  # 将查询出的 id 和 user_name 返回
         else:
             return False
 

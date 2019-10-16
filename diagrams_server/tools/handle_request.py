@@ -15,16 +15,16 @@ class HandleRequest:
         :return:
         """
         request = request_head.split("\n")
-        user_id = request[0].lstrip("User_Id: ")
-        user_name = request[1].lstrip("User_Name: ")
-        option_key = request[2].lstrip("Option_Key: ")
+        user_id = request[0].split(" ")[1]
+        user_name = request[1].split(" ")[1]
+        option_key = request[2].split(" ")[1]
         if option_key == "1":
             number_one = None
             number_two = None
             return user_id, user_name, option_key, number_one, number_two
         elif option_key == "2":
-            number_one = request[3].lstrip("Number_One: ")
-            number_two = request[4].lstrip("Number_Two: ")
+            number_one = request[3].split(" ")[1]
+            number_two = request[4].split(" ")[1]
             return user_id, user_name, option_key, number_one, number_two
 
     @staticmethod
@@ -35,9 +35,11 @@ class HandleRequest:
         :return: phone 账户手机号 str; password 密码 str; user_name 用户昵称 str
         """
         request = request_head.split("\n")
-        phone = request[0].lstrip("Phone: ")
-        password = request[1].lstrip("Password: ")
-        user_name = request[2].lstrip("User_Name: ")
+        print(request)
+        phone = request[0].split(" ")[1]
+        password = request[1].split(" ")[1]
+        user_name = request[2].split(" ")[1]
+        print("501", user_name)
         return phone, password, user_name
 
     @staticmethod
@@ -47,7 +49,7 @@ class HandleRequest:
         :param request_head: 注册请求头
         :return: phone 账户手机号 str
         """
-        return request_head.lstrip("Phone: ")
+        return request_head.split(" ")[1]
 
     @staticmethod
     def handle_login(request_head):
@@ -57,8 +59,8 @@ class HandleRequest:
         :return: account 手机格式的账户 str; password 密码 str
         """
         request = request_head.split("\n")
-        account = request[0].lstrip("Account: ")
-        password = request[1].lstrip("Password: ")
+        account = request[0].split(" ")[1]
+        password = request[1].split(" ")[1]
         return account, password
 
     @staticmethod
@@ -82,6 +84,7 @@ class HandleRequest:
             pass
         elif request_row[0] == "EXIT":
             return request_row[0], None, None
+
 
 
 

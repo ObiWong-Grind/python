@@ -77,6 +77,7 @@ class DiagramsView(Process):
         res = result.insert_user(password, user_name)
         if res:
             msg = "FTP/1.0 200 OK\r\nUser_Id: %s\nUser_Name: %s\r\n\r\n" % (res[0], res[1])
+            print(msg)
             self._connfd.send(msg.encode())
         else:
             self._connfd.send(b"FTP/1.0 403 ERROR\r\n\r\n\r\n")
@@ -106,7 +107,7 @@ class DiagramsView(Process):
         :param request_head: 请求头
         """
         account, password = self._tools.handle_login(request_head)
-        result = self._login.match_login_info(account, password)
+        result = self._login.select_login_info(account, password)
         if result:
             msg = "FTP/1.0 200 OK\r\nUser_Id: %s\nUser_Name: %s\r\n\r\n" % (result[0], result[1])
             self._connfd.send(msg.encode())

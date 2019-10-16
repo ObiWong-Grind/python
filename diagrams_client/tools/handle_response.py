@@ -15,10 +15,10 @@ class HandleResponse:
         :return: 原卦, 本卦, 互卦, 变卦
         """
         response = response_head.split("\n")
-        o_diagram = response[0].lstrip("O_Diagram: ")
-        f_diagram = response[1].lstrip("F_Diagram: ")
-        s_diagram = response[2].lstrip("S_Diagram: ")
-        t_diagram = response[3].lstrip("T_Diagram: ")
+        o_diagram = response[0].split(" ")[1]
+        f_diagram = response[1].split(" ")[1]
+        s_diagram = response[2].split(" ")[1]
+        t_diagram = response[3].split(" ")[1]
         return o_diagram, f_diagram, s_diagram, t_diagram
 
     @staticmethod
@@ -29,8 +29,8 @@ class HandleResponse:
         :return: 用户id, 用户昵称
         """
         response = response_head.split("\n")
-        user_id = response[0].lstrip("User_Id: ")
-        user_name = response[1].lstrip("User_Name: ")
+        user_id = response[0].split(" ")[1]
+        user_name = response[1].split(" ")[1]
         return user_id, user_name
 
     @staticmethod
