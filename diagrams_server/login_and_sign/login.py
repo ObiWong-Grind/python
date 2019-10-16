@@ -16,13 +16,6 @@ class DiagramLogin:
         """
         self.__connect_db = OperationDB()
 
-    def select_login_time(self, user_id):
-        """
-            修改上线时间
-        :param user_id: 用户id
-        """
-        return self.__connect_db.select_login_time(user_id)
-
     def select_login_info(self, account, password):
         """
             使用账号、密码通过sql语句执行 匹配账号密码是否正确

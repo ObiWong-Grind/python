@@ -25,7 +25,7 @@ class OperationDB:
         self.__cur.close()
         self.__db.close()
 
-    def select_login_time(self, user_id):
+    def __select_login_time(self, user_id):
         """
             修改上线时间
         :param user_id: 用户id
@@ -49,7 +49,7 @@ class OperationDB:
         self.__cur.execute(sql, [account, password])
         data = self.__cur.fetchone()
         if data:  # 如果 data 有返回值
-            self.select_login_time(data[0])  # 修改用户上线时间
+            self.__select_login_time(data[0])  # 修改用户上线时间
             return data  # 将查询出的 id 和 user_name 返回
         else:
             return False
@@ -101,7 +101,6 @@ class OperationDB:
         :param f_diagram: 本卦
         :param s_diagram: 互卦
         :param t_diagram: 变化
-        :return:
         """
         try:
             sql = "insert into three_diagrams (user_id,user_name,option_key,request,o_diagram,f_diagram,s_diagram,t_diagram) values (%s,%s,%s,%s,%s,%s,%s,%s);"

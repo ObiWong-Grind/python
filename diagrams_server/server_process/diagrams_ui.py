@@ -74,7 +74,7 @@ class DiagramsView(Process):
         :param request_head: 请求头
         """
         phone, password, user_name = self._tools.handle_insert(request_head)
-        password = PassWordHash().hashpasswd(phone, password)
+        password = PassWordHash().hash_passwd(phone, password)
         result = DiagramSign(phone).insert_user(password, user_name)
         if result:
             msg = "FTP/1.0 200 OK\r\nUser_Id: %s\nUser_Name: %s\r\n\r\n" % (result[0], result[1])
@@ -107,7 +107,7 @@ class DiagramsView(Process):
         :param request_head: 请求头
         """
         account, password = self._tools.handle_login(request_head)
-        password = PassWordHash().hashpasswd(account, password)
+        password = PassWordHash().hash_passwd(account, password)
         result = self._login.select_login_info(account, password)
         if result:
             msg = "FTP/1.0 200 OK\r\nUser_Id: %s\nUser_Name: %s\r\n\r\n" % (result[0], result[1])

@@ -1,4 +1,4 @@
-# diagrams v1.2.0
+# diagrams v1.2.3
 
 1. 部分结构调整
 

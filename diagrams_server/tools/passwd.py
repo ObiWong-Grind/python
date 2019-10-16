@@ -8,7 +8,7 @@ import hashlib
 
 class PassWordHash:
     @staticmethod
-    def hashpasswd(account, password):
+    def hash_passwd(account, password):
         """
             生成加密后的密码
         :return: 加密密码
