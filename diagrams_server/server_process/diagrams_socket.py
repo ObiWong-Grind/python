@@ -5,7 +5,8 @@
 
 import signal, time
 from socket import *
-from server_process.diagrams_ui import *
+from server_process.diagrams_server import *
+from core.operation_db import *
 
 
 HOST = "0.0.0.0"
@@ -26,6 +27,8 @@ class DiagramsSocket:
         self._sockfd.bind(ADDR)  # 绑定地址
         self._sockfd.listen(10)  # 设置监听
         signal.signal(signal.SIGCHLD, signal.SIG_IGN)  # 设置处理僵尸进程
+        # 生成对象时自动启动了数据库
+        self._connect_db = OperationDB(host="localhost", port=3306, user="root", password="122336978", database="diagrams", charset="utf8")
 
     def __write_log(self, text):
         """
@@ -46,12 +49,14 @@ class DiagramsSocket:
                 connfd, addr = self._sockfd.accept()  # 阻塞等待客户端链接
                 print("Connect from", addr)
             except KeyboardInterrupt:  # 当服务器退出
+                self._sockfd.close()
+                self._connect_db.close()
                 sys.exit("Server Exit...")  # 关闭主进程
             except Exception as e:  # 其余错误记录日志
                 self.__write_log(e)
                 continue
 
-            client = DiagramsView(connfd, addr)
+            client = DiagramsServer(connfd, addr, self._connect_db)
             client.daemon = True
             client.start()
 

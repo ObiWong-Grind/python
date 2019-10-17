@@ -5,32 +5,22 @@
 
 
 from core.diagrams_model import *
-from core.operation_db import *
 
 
 class DiagramsController:
     """
         卦爻划分
     """
-    def __init__(self, number01, number02, user_id, user_name, option_key, request):
+    def __init__(self, number01, number02):
         """
             初始化
         :param number01: 数字1
         :param number02: 数字2
-        :param user_id: 用户ID
-        :param user_name: 用户昵称
-        :param option_key: 键值
-        :param request: 求问的问题
         """
         self.__yao = YaoModel()
         self.__number_one = number01
         self.__number_two = number02
-        self.__user_id = user_id
-        self.__user_name = user_name
-        self.__option_key = option_key
-        self.__request = request
         self.__o_diagram = ""
-        self.__connect_db = OperationDB()
 
     def __record_original_diagram(self, target_list):
         """
@@ -160,8 +150,9 @@ class DiagramsController:
         f_diagram = "".join(self.__first_diagram())
         s_diagram = "".join(self.__second_diagram())
         t_diagram = "".join(self.__third_diagram())
-        self.__connect_db.insert_history(self.__user_id, self.__user_name, self.__option_key, self.__request, self.__o_diagram, f_diagram, s_diagram, t_diagram)
         return self.__o_diagram, f_diagram, s_diagram, t_diagram
+
+
 
 
 

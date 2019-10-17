@@ -1,5 +1,6 @@
 """
     数据库操作
+    host="localhost", port=3306, user="root", password="122336978", database="diagrams", charset="utf8"
 """
 
 
@@ -10,20 +11,33 @@ class OperationDB:
     """
         数据库处理
     """
-    def __init__(self):
-        self.__db, self.__cur = self.__connect_db()
+    def __init__(self, host=None, port=None, user=None, password=None, database=None, charset=None):
+        self._host = host
+        self._port = port
+        self._user = user
+        self._password = password
+        self._database = database
+        self._charset = charset
+        self.__connect_db()
 
     def __connect_db(self):
         """
             启动数据库
         """
-        db = pymysql.connect(host="localhost", port=3306, user="root", password="122336978", database="diagrams", charset="utf8")
-        cur = db.cursor()
-        return db, cur
+        self.__db = pymysql.connect(host=self._host, port=self._port, user=self._user, password=self._password, database=self._database, charset=self._charset)
 
-    def __close_db(self):
-        self.__cur.close()
+    def close(self):
+        """
+            关闭数据库
+        """
         self.__db.close()
+
+    def create_cursor(self):
+        """
+            创建游标
+        :return:
+        """
+        self.__cur = self.__db.cursor()
 
     def __select_login_time(self, user_id):
         """
@@ -37,9 +51,6 @@ class OperationDB:
         except Exception as e:
             self.__db.rollback()
             print("2", e)
-        finally:
-            self.__cur.close()
-            self.__db.close()
 
     def select_login_info(self, account, password):
         """
@@ -73,7 +84,6 @@ class OperationDB:
             result = self.select_login_info(phone, password)
             if result:
                 return result
-            self.__close_db()
 
     def select_phone(self, phone):
         """
@@ -84,10 +94,8 @@ class OperationDB:
         self.__cur.execute(sql, [phone])
         data = self.__cur.fetchone()
         if data:  # 如果data有值表示 手机号已被占用
-            self.__close_db()
             return False
         else:
-            self.__close_db()
             return True
 
     def insert_history(self, user_id, user_name, option_key, request, o_diagram, f_diagram, s_diagram, t_diagram):
@@ -109,8 +117,6 @@ class OperationDB:
         except Exception as e:
             self.__db.rollback()
             print(e)
-        finally:
-            self.__close_db()
 
 
 

@@ -13,27 +13,28 @@
 import random, sys
 from core.diagrams_bll import *
 from multiprocessing import Process
-from login_and_sign.sign import *
 from tools.handle_request import *
 from tools.passwd import *
 
 
-class DiagramsView(Process):
+class DiagramsServer(Process):
     """
         起卦视图
     """
     count = 0
 
-    def __init__(self, connfd, addr):
+    def __init__(self, connfd, addr, db):
         """
             初始化
         :param connfd: 连接套接字
         :param addr: 连接地址
+        :param db:
         """
         self._connfd = connfd
         self._addr = addr
-        self._login = DiagramLogin()
         self._tools = HandleRequest()
+        self._db = db  # 在父进程生成的数据库对象
+        self._db.create_cursor()  # 使用这个_db对象创建属于子进程的游标
         super().__init__()
 
     def __random_diagrams(self, user_id, user_name, option_key, request):
@@ -44,15 +45,21 @@ class DiagramsView(Process):
         :param option_key: 键值
         :param request: 求问问题
         """
-        o_diagram, f_diagram, s_diagram, t_diagram = DiagramsController(random.randint(0, 100), random.randint(0, 100), user_id, user_name, option_key, request).output()
+        o_diagram, f_diagram, s_diagram, t_diagram = DiagramsController(random.randint(0, 100), random.randint(0, 100)).output()
+        self._db.insert_history(user_id, user_name, option_key, request, o_diagram, f_diagram, s_diagram, t_diagram)
         msg = "FTP/1.0 100 FOUR_DIAGRAMS\r\nO_Diagram: %s\nF_Diagram: %s\nS_Diagram: %s\nT_Diagram: %s\r\n\r\n" % (o_diagram, f_diagram, s_diagram, t_diagram)
         self._connfd.send(msg.encode())
 
     def __choice_number_diagrams(self, number01, number02, user_id, user_name, option_key, request):
         """
             报数起卦
+        :param user_id: 用户id
+        :param user_name: 用户昵称
+        :param option_key: 键值
+        :param request: 求问问题
         """
-        o_diagram, f_diagram, s_diagram, t_diagram = DiagramsController(number01, number02, user_id, user_name, option_key, request).output()
+        o_diagram, f_diagram, s_diagram, t_diagram = DiagramsController(number01, number02).output()
+        self._db.insert_history(user_id, user_name, option_key, request, o_diagram, f_diagram, s_diagram, t_diagram)
         msg = "FTP/1.0 100 FOUR_DIAGRAMS\r\nO_Diagram: %s\nF_Diagram: %s\nS_Diagram: %s\nT_Diagram: %s\r\n\r\n" % (o_diagram, f_diagram, s_diagram, t_diagram)
         self._connfd.send(msg.encode())
 
@@ -75,7 +82,7 @@ class DiagramsView(Process):
         """
         phone, password, user_name = self._tools.handle_insert(request_head)
         password = PassWordHash().hash_passwd(phone, password)
-        result = DiagramSign(phone).insert_user(password, user_name)
+        result = self._db.insert_user(phone, password, user_name)
         if result:
             msg = "FTP/1.0 200 OK\r\nUser_Id: %s\nUser_Name: %s\r\n\r\n" % (result[0], result[1])
             self._connfd.send(msg.encode())
@@ -95,7 +102,7 @@ class DiagramsView(Process):
         :param request_head: 请求头
         """
         phone = self._tools.handle_sign(request_head)
-        result = DiagramSign(phone).select_phone()
+        result = self._db.select_phone(phone)
         if result:
             self._connfd.send(b"FTP/1.0 200 OK\r\n\r\n\r\n")
         else:
@@ -108,7 +115,7 @@ class DiagramsView(Process):
         """
         account, password = self._tools.handle_login(request_head)
         password = PassWordHash().hash_passwd(account, password)
-        result = self._login.select_login_info(account, password)
+        result = self._db.select_login_info(account, password)
         if result:
             msg = "FTP/1.0 200 OK\r\nUser_Id: %s\nUser_Name: %s\r\n\r\n" % (result[0], result[1])
             self._connfd.send(msg.encode())
