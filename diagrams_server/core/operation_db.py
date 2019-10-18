@@ -125,19 +125,18 @@ class OperationDB:
         :param user_name: 用户昵称
         :param count: 条数
         """
-        # sql = "select id,user_name,option_key,request,request_time from three_diagrams where user_id=%s and user_name=%s order by request_time desc limit %s;"
         sql = "select id,user_name,option_key,request,request_time from three_diagrams where user_id=%s and user_name=%s order by request_time desc;"
         self.__cur.execute(sql, [user_id, user_name])
-        # return self.__cur.fetchall()
         return self.__cur.fetchmany(count)
 
-    def select_hist_id(self, hist_id):
+    def select_hist_id(self, hist_id, user_name):
         """
             按照历史记录id查询历史记录详情
         :param hist_id: 历史记录id
+        :param user_name: 用户昵称
         """
-        sql = "select option_key,request,o_diagram,f_diagram,s_diagram,t_diagram,request_time from three_diagrams where id=%s;"
-        self.__cur.execute(sql, [hist_id])
+        sql = "select option_key,request,o_diagram,f_diagram,s_diagram,t_diagram,request_time from three_diagrams where id=%s and user_name=%s;"
+        self.__cur.execute(sql, [int(hist_id), user_name])
         return self.__cur.fetchone()
 
 

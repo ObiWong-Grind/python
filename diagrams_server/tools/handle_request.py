@@ -12,9 +12,12 @@ class HandleRequest:
         """
             处理历史记录id请求
         :param request_head: 请求头
-        :return: 历史记录id
+        :return: 历史记录id, 用户昵称
         """
-        return request_head.split("Hist_Id: ")[1]
+        request = request_head.split("\n")
+        hist_id = request[0].split("Hist_Id: ")[1]
+        user_name = request[1].split("User_Name: ")[1]
+        return hist_id, user_name
 
     @staticmethod
     def handle_history(request_head):

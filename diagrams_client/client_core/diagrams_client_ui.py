@@ -16,6 +16,7 @@
 
 import sys, getpass
 from tools.handle_response import *
+from common.config import *
 
 MENU_1 = """
 ========= 导航命令 =========
@@ -213,7 +214,7 @@ class DiagramsClientView:
             按编号请求查看历史记录详情
         :param id_number: 历史记录id
         """
-        request_data = "HISTORY_ID / FTP/1.0\r\nHist_Id: %s\r\n\r\n" % id_number
+        request_data = "HISTORY_ID / FTP/1.0\r\nHist_Id: %s\nUser_Name: %s\r\n\r\n" % (id_number, self.__user_name)
         self.__sockfd.send(request_data.encode())
         response = self.__sockfd.recv(512).decode()
         response_code, response_info, response_head = self.__tools.handle_response_info(response)
@@ -296,15 +297,41 @@ class DiagramsClientView:
             输入昵称
             后续加验证
         """
-        return input("请输入昵称：")
+        while True:
+            user_name = input("请输入昵称：")
+            if " " in user_name or " " in user_name:
+                print("你输入的昵称中存在不符合规定的内容，请重新输入！")
+                continue
+            return user_name
 
     def __input_password(self):
         """
             输入密码
             后续要做加格式验证
         """
-        pwd = getpass.getpass("请输入密码：")
-        return pwd
+        while True:
+            pwd = getpass.getpass("请输入密码：")
+            if " " in pwd or " " in pwd:
+                print("你输入的密码中存在不符合规定的内容，请重新输入！")
+            else:
+                return pwd
+
+    def __input_phone(self, msg):
+        """
+            输入手机号账号
+        :param msg: 提示信息
+        :return: 手机号
+        """
+        while True:
+            phone = input(msg)
+            if " " in phone or " " in phone:
+                print("你输入的手机号中存在不符合规定的内容，请重新输入！")
+            elif not phone.isdigit() or len(phone) != 11:
+                print("你输入的手机号格式有误，请重新输入！")
+            elif phone[0:3] not in phone_number_head:
+                print("输入的手机号格式有误，目前仅支持大路地区用户！")
+            else:
+                return phone
 
     def __over_sign(self, phone):
         """
@@ -330,7 +357,7 @@ class DiagramsClientView:
             注册流程
         """
         while True:
-            phone = input("请输入手机号：")
+            phone = self.__input_phone("请输入手机号：")
             request_data = "SIGN / FTP/1.0\r\nPhone: %s\r\n\r\n" % phone
             self.__sockfd.send(request_data.encode())
             response = self.__sockfd.recv(512).decode()
@@ -353,8 +380,8 @@ class DiagramsClientView:
             输入账号、密码，进行登录流程
         """
         while True:
-            account = input("请输入账号：")
-            password = getpass.getpass("请输入密码：")
+            account = self.__input_phone("请输入账号：")
+            password = self.__input_password()
             request_data = "LOGIN / FTP/1.0\r\nAccount: %s\nPassword: %s\r\n\r\n" % (account, password)
             self.__sockfd.send(request_data.encode())
             response = self.__sockfd.recv(512).decode()

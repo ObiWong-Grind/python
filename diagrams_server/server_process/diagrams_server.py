@@ -146,8 +146,8 @@ class DiagramsServer(Process):
             按照id查询历史记录详情
         :param request_head: 请求头
         """
-        hist_id = self._tools.handle_history_id(request_head)
-        hist = self._db.select_hist_id(hist_id)
+        hist_id, user_name = self._tools.handle_history_id(request_head)
+        hist = self._db.select_hist_id(hist_id, user_name)
         if not hist:
             self._connfd.send(b"FTP/1.0 404 FAIL\r\n\r\n\r\n")
             return

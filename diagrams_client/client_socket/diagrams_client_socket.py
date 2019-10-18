@@ -5,11 +5,10 @@
 
 from socket import *
 from client_core.diagrams_client_ui import *
+from common.config import *
 
 
-HOST = "127.0.0.1"
-# HOST = "47.56.132.251"
-PORT = 38597
+ADDR_TEST = (HOST_TEST, PORT_TEST)
 ADDR = (HOST, PORT)
 
 
