@@ -28,8 +28,8 @@ MENU_1 = """
 MENU_2 = """
 =========== 命令 ===========
         1. 起卦
-        2. 查看历史
-        Q. 关闭
+        2. 历史记录
+        3. 退出
 ===========================
 """
 
@@ -38,6 +38,13 @@ MENU_3 = """
         1. 随机起卦
         2. 报数起卦
         3. 返回上级
+===========================
+"""
+
+MENU_4 = """
+=========== 命令 ===========
+    输入 id编号 查看历史详情
+     输入 exit 返回上一级
 ===========================
 """
 
@@ -66,6 +73,7 @@ class DiagramsClientView:
         self.__f_diagram = ""
         self.__s_diagram = ""
         self.__t_diagram = ""
+        self.__hist_id_list = []
 
     def __create_dict(self):
         """
@@ -158,7 +166,7 @@ class DiagramsClientView:
             try:
                 number = int(number)
                 if number < 0 or number > 50:
-                    raise ValueError()
+                    raise ValueError("请输入要求范围内的数字！")
             except Exception as e:
                 print(e)
                 continue
@@ -179,18 +187,94 @@ class DiagramsClientView:
             elif cmd.strip() == "2":
                 self.__choice_number_diagrams(cmd.strip())
             elif cmd.strip() == "3":
-                self.__do_play()
+                return
+            else:
+                print("输入的命令不正确！")
+
+    def __history_id(self):
+        """
+            输入历史记录编号
+        """
+        while True:
+            print(MENU_4)
+            try:
+                id_number = input("请输入ID：")
+            except KeyboardInterrupt:
+                sys.exit("欢迎下次再来！")
+            if id_number == "exit" or id_number == "Exit":
+                return
+            if id_number not in self.__hist_id_list:
+                print("请输入正确ID！")
+                continue
+            self.__request_hist_id(id_number)
+
+    def __request_hist_id(self, id_number):
+        """
+            按编号请求查看历史记录详情
+        :param id_number: 历史记录id
+        """
+        request_data = "HISTORY_ID / FTP/1.0\r\nHist_Id: %s\r\n\r\n" % id_number
+        self.__sockfd.send(request_data.encode())
+        response = self.__sockfd.recv(512).decode()
+        response_code, response_info, response_head = self.__tools.handle_response_info(response)
+        if response_code == "200" and response_info == "OK":
+            option_key, request, self.__o_diagram, self.__f_diagram, self.__s_diagram, self.__t_diagram, request_time = self.__tools.handle_history_id(response_head)
+            print("求卦内容：", request)
+            if option_key == "1":
+                print("求卦方式：", "随机起卦")
+            elif option_key == "2":
+                print("求卦方式：", "报数起卦")
+            print("求卦时间：", request_time)
+            self.__create_dict()
+        elif response_code == "404" and response_info == "FAIL":
+            print("未找到该条历史记录！")
+            return
 
     def __history(self):
         """
             查看历史
         """
         request_data = "HISTORY / FTP/1.0\r\nUser_Id: %s\nUser_Name: %s\r\n\r\n" % (self.__user_id, self.__user_name)
-        # self.__sockfd.send(request_data.encode())
+        self.__sockfd.send(request_data.encode())
+        response = self.__sockfd.recv(512).decode()
+        response_code, response_info, response_head = self.__tools.handle_response_info(response)
+        if response_code == "200" and response_info == "OK":  # 有历史记录
+            self.__recv_hist()
+            self.__history_id()
+        else:
+            print("没有历史记录！")
+            return
+
+    def __recv_hist(self):
+        """
+            接收历史记录
+        :return:
+        """
+        msg = ""
+        while True:
+            data = self.__sockfd.recv(2048).decode()
+            if data == "*#06#":
+                break
+            msg += data
+        self.__print_hist(msg)
+
+    def __print_hist(self, msg):
+        """
+            打印历史记录
+        :param msg: 接收到的历史记录信息
+        """
+        for item in self.__tools.handle_history(msg):
+            if item[2] == "1":
+                option_key = "随机起卦"
+            elif item[2] == "2":
+                option_key = "报数起卦"
+            print("id:%s | %s | %s | %s | %s" % (item[0], item[1], option_key, item[4], item[3]))
+            if item[0] not in self.__hist_id_list:
+                self.__hist_id_list.append(item[0])
 
     def __do_play(self):
         """
-            选择起卦、查看历史、关闭
+            选择起卦、历史记录、退出
         """
         while True:
             print(MENU_2)
@@ -202,8 +286,8 @@ class DiagramsClientView:
                 self.__request_diagram()
             elif cmd.strip() == "2":
                 self.__history()
-            elif cmd.strip() == "Q" or cmd.strip() == "q":
-                self.__do_exit()
+            elif cmd.strip() == "3":
+                self.input_cmd()
             else:
                 print("输入的命令不正确！")
 

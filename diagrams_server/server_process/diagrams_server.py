@@ -15,6 +15,7 @@ from core.diagrams_bll import *
 from multiprocessing import Process
 from tools.handle_request import *
 from tools.passwd import *
+from time import sleep
 
 
 class DiagramsServer(Process):
@@ -127,7 +128,31 @@ class DiagramsServer(Process):
             处理查询历史
         :param request_head: 请求头
         """
-        pass
+        user_id, user_name = self._tools.handle_history(request_head)
+        hist = self._db.select_history(user_id, user_name, 10)
+        if not hist:
+            self._connfd.send(b"FTP/1.0 404 FAIL\r\n\r\n\r\n")
+            return
+        msg = "FTP/1.0 200 OK\r\n\r\n\r\n"
+        self._connfd.send(msg.encode())
+        for item in hist:
+            msg = "FTP/1.0 200 OK\r\nId: %s\nUser_Name: %s\nOption_Key: %s\nRequest: %s\nRequest_Time: %s\r\n\r\n" % (item[0], item[1], item[2], item[3], item[4])
+            self._connfd.send(msg.encode())
+        sleep(0.7)
+        self._connfd.send(b"*#06#")
+
+    def __handle_history_id(self, request_head):
+        """
+            按照id查询历史记录详情
+        :param request_head: 请求头
+        """
+        hist_id = self._tools.handle_history_id(request_head)
+        hist = self._db.select_hist_id(hist_id)
+        if not hist:
+            self._connfd.send(b"FTP/1.0 404 FAIL\r\n\r\n\r\n")
+            return
+        msg = "FTP/1.0 200 OK\r\nOption_Key: %s\nRequest: %s\nO_Diagram: %s\nF_Diagram: %s\nS_Diagram: %s\nT_Diagram: %s\nRequest_Time: %s\r\n\r\n" % (hist[0], hist[1], hist[2], hist[3], hist[4], hist[5], hist[6])
+        self._connfd.send(msg.encode())
 
     def run(self):
         """
@@ -151,7 +176,7 @@ class DiagramsServer(Process):
             elif request_row == "HISTORY":  # 当用户请求历史记录列表时
                 self.__handle_history(request_head)
             elif request_row == "HISTORY_ID":  # 用户请求历史记录ID
-                pass
+                self.__handle_history_id(request_head)
 
 
 

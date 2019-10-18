@@ -8,11 +8,32 @@ class HandleRequest:
         请求处理工具类
     """
     @staticmethod
+    def handle_history_id(request_head):
+        """
+            处理历史记录id请求
+        :param request_head: 请求头
+        :return: 历史记录id
+        """
+        return request_head.split("Hist_Id: ")[1]
+
+    @staticmethod
+    def handle_history(request_head):
+        """
+            处理历史记录请求
+        :param request_head: 请求头
+        :return:
+        """
+        request = request_head.split("\n")
+        user_id = request[0].split(" ")[1]
+        user_name = request[1].split(" ")[1]
+        return user_id, user_name
+
+    @staticmethod
     def handle_request(request_head):
         """
             处理求卦请求
         :param request_head: 请求头
-        :return:
+        :return: 用户id, 用户昵称, 求卦方式, 数字1, 数字2
         """
         request = request_head.split("\n")
         user_id = request[0].split(" ")[1]
@@ -66,7 +87,7 @@ class HandleRequest:
         """
             处理请求内容，根据请求行做相应的处理
         :param request_data: 请求内容
-        :return: 请求头关键字, [请求行, 请求体]
+        :return: 请求行关键字, [请求头, 请求体]
         """
         request = request_data.split("\r\n")  # 按切割请求
         request_row = request[0].split(" ")
@@ -79,7 +100,9 @@ class HandleRequest:
         elif request_row[0] == "REQUEST":
             return request_row[0], request[1], request[3]
         elif request_row[0] == "HISTORY":
-            pass
+            return request_row[0], request[1], None
+        elif request_row[0] == "HISTORY_ID":
+            return request_row[0], request[1], None
         elif request_row[0] == "EXIT":
             return request_row[0], None, None
 

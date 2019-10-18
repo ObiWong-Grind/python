@@ -102,7 +102,7 @@ class OperationDB:
         """
             插入数据库
         :param user_id: 用户id
-        :param user_name: 用户姓名
+        :param user_name: 用户昵称
         :param option_key: 求卦选项
         :param request: 问卦
         :param o_diagram: 原本卦
@@ -118,6 +118,27 @@ class OperationDB:
             self.__db.rollback()
             print(e)
 
+    def select_history(self, user_id, user_name, count):
+        """
+            查询历史记录
+        :param user_id: 用户id
+        :param user_name: 用户昵称
+        :param count: 条数
+        """
+        # sql = "select id,user_name,option_key,request,request_time from three_diagrams where user_id=%s and user_name=%s order by request_time desc limit %s;"
+        sql = "select id,user_name,option_key,request,request_time from three_diagrams where user_id=%s and user_name=%s order by request_time desc;"
+        self.__cur.execute(sql, [user_id, user_name])
+        # return self.__cur.fetchall()
+        return self.__cur.fetchmany(count)
+
+    def select_hist_id(self, hist_id):
+        """
+            按照历史记录id查询历史记录详情
+        :param hist_id: 历史记录id
+        """
+        sql = "select option_key,request,o_diagram,f_diagram,s_diagram,t_diagram,request_time from three_diagrams where id=%s;"
+        self.__cur.execute(sql, [hist_id])
+        return self.__cur.fetchone()
 
 
 

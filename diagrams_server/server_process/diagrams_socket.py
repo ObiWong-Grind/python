@@ -57,7 +57,7 @@ class DiagramsSocket:
                 continue
 
             client = DiagramsServer(connfd, addr, self._connect_db)
-            client.daemon = True
+            client.daemon = True  # daemon要在start前面
             client.start()
 
     def main(self):

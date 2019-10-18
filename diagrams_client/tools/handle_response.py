@@ -8,6 +8,42 @@ class HandleResponse:
         响应处理工具类
     """
     @staticmethod
+    def handle_history_id(response_head):
+        """
+            提取响应头中的历史记录详情信息
+        :param response_head: 响应头
+        :return: option_key,request,o_diagram,f_diagram,s_diagram,t_diagram,request_time
+        """
+        response = response_head.split("\n")
+        option_key = response[0].split("Option_Key: ")[1]
+        request = response[1].split("Request: ")[1]
+        o_diagram = response[2].split("O_Diagram: ")[1]
+        f_diagram = response[3].split("F_Diagram: ")[1]
+        s_diagram = response[4].split("S_Diagram: ")[1]
+        t_diagram = response[5].split("T_Diagram: ")[1]
+        request_time = response[6].split("Request_Time: ")[1]
+        return option_key, request, o_diagram, f_diagram, s_diagram, t_diagram, request_time
+
+    @staticmethod
+    def handle_history(msg):
+        """
+            提取信息中的每一条历史记录
+        :param msg: 信息
+        :return: 生成器函数
+        """
+        tmp = msg.split("FTP/1.0 200 OK\r\n")
+        for item in tmp:
+            t = item.split("\r\n")
+            if t[0]:
+                t2 = t[0].split("\n")
+                id_ = t2[0].split("Id: ")[1]
+                user_name = t2[1].split("User_Name: ")[1]
+                option_key = t2[2].split("Option_Key: ")[1]
+                request = t2[3].split("Request: ")[1]
+                request_time = t2[4].split("Request_Time: ")[1]
+                yield id_, user_name, option_key, request, request_time
+
+    @staticmethod
     def handle_diagrams(response_head):
         """
             提取响应头的四个卦体

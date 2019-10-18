@@ -8,6 +8,7 @@ from client_core.diagrams_client_ui import *
 
 
 HOST = "127.0.0.1"
+# HOST = "47.56.132.251"
 PORT = 38597
 ADDR = (HOST, PORT)
 
