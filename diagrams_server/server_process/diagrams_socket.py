@@ -7,7 +7,7 @@ import signal, time
 from socket import *
 from server_process.diagrams_server import *
 from core.operation_db import *
-from server_common.config import *
+from server_common.settings import *
 
 
 ADDR = (HOST, PORT)
