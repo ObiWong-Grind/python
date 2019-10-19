@@ -31,16 +31,15 @@ class HandleResponse:
         :param msg: 信息
         :return: 生成器函数
         """
-        tmp = msg.split("FTP/1.0 200 OK\r\n")
+        tmp = msg.split("[#@@$$@@#]")
         for item in tmp:
-            t = item.split("\r\n")
-            if t[0]:
-                t2 = t[0].split("\n")
-                id_ = t2[0].split("Id: ")[1]
-                user_name = t2[1].split("User_Name: ")[1]
-                option_key = t2[2].split("Option_Key: ")[1]
-                request = t2[3].split("Request: ")[1]
-                request_time = t2[4].split("Request_Time: ")[1]
+            if item:
+                t = item.split("<@$$@>")
+                id_ = t[0].split("Id: ")[1]
+                user_name = t[1].split("User_Name: ")[1]
+                option_key = t[2].split("Option_Key: ")[1]
+                request = t[3].split("Request: ")[1]
+                request_time = t[4].split("Request_Time: ")[1]
                 yield id_, user_name, option_key, request, request_time
 
     @staticmethod
@@ -68,6 +67,23 @@ class HandleResponse:
         user_id = response[0].split(" ")[1]
         user_name = response[1].split(" ")[1]
         return user_id, user_name
+
+    @staticmethod
+    def handle_response_all(response_data):
+        """
+            处理带有相应体的请求
+        :param response_data:
+        :return: 响应码, 相应信息, 响应头, 响应体
+        """
+        response = response_data.split("\r\n")
+        response_row = response[0].split(" ")
+        response_code = response_row[1]
+        response_info = response_row[2]
+        if not response[1]:
+            response_head = None
+        else:
+            response_head = response[1]
+        return response_code, response_info, response_head, response[3]
 
     @staticmethod
     def handle_response_info(response_data):

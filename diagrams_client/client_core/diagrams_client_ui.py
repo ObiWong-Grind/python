@@ -16,7 +16,7 @@
 
 import sys, getpass
 from tools.handle_response import *
-from common.config import *
+from client_common.config import *
 
 MENU_1 = """
 ========= 导航命令 =========
@@ -237,27 +237,14 @@ class DiagramsClientView:
         """
         request_data = "HISTORY / FTP/1.0\r\nUser_Id: %s\nUser_Name: %s\r\n\r\n" % (self.__user_id, self.__user_name)
         self.__sockfd.send(request_data.encode())
-        response = self.__sockfd.recv(512).decode()
-        response_code, response_info, response_head = self.__tools.handle_response_info(response)
+        response = self.__sockfd.recv(4096).decode()
+        response_code, response_info, response_head, response_body = self.__tools.handle_response_all(response)
         if response_code == "200" and response_info == "OK":  # 有历史记录
-            self.__recv_hist()
+            self.__print_hist(response_body)
             self.__history_id()
         else:
             print("没有历史记录！")
             return
-
-    def __recv_hist(self):
-        """
-            接收历史记录
-        :return:
-        """
-        msg = ""
-        while True:
-            data = self.__sockfd.recv(2048).decode()
-            if data == "*#06#":
-                break
-            msg += data
-        self.__print_hist(msg)
 
     def __print_hist(self, msg):
         """
@@ -265,6 +252,7 @@ class DiagramsClientView:
         :param msg: 接收到的历史记录信息
         """
         for item in self.__tools.handle_history(msg):
+            option_key = ""
             if item[2] == "1":
                 option_key = "随机起卦"
             elif item[2] == "2":

@@ -5,10 +5,9 @@
 
 from socket import *
 from client_core.diagrams_client_ui import *
-from common.config import *
+from client_common.config import *
 
 
-ADDR_TEST = (HOST_TEST, PORT_TEST)
 ADDR = (HOST, PORT)
 
 

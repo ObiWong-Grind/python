@@ -7,10 +7,9 @@ import signal, time
 from socket import *
 from server_process.diagrams_server import *
 from core.operation_db import *
+from server_common.config import *
 
 
-HOST = "0.0.0.0"
-PORT = 38597
 ADDR = (HOST, PORT)
 
 
@@ -23,7 +22,7 @@ class DiagramsSocket:
             初始化TCP套接字
         """
         self._sockfd = socket()  # 创建tcp套接字
-        self._sockfd.setsockopt(SOL_SOCKET, SO_REUSEADDR, True)  # 设置套接字端口立即重用
+        self._sockfd.setsockopt(SOL_SOCKET, SO_REUSEADDR, DEBUG)  # 设置套接字端口立即重用
         self._sockfd.bind(ADDR)  # 绑定地址
         self._sockfd.listen(10)  # 设置监听
         signal.signal(signal.SIGCHLD, signal.SIG_IGN)  # 设置处理僵尸进程

@@ -134,12 +134,9 @@ class DiagramsServer(Process):
             self._connfd.send(b"FTP/1.0 404 FAIL\r\n\r\n\r\n")
             return
         msg = "FTP/1.0 200 OK\r\n\r\n\r\n"
-        self._connfd.send(msg.encode())
         for item in hist:
-            msg = "FTP/1.0 200 OK\r\nId: %s\nUser_Name: %s\nOption_Key: %s\nRequest: %s\nRequest_Time: %s\r\n\r\n" % (item[0], item[1], item[2], item[3], item[4])
-            self._connfd.send(msg.encode())
-        sleep(0.7)
-        self._connfd.send(b"*#06#")
+            msg += "Id: %s<@$$@>User_Name: %s<@$$@>Option_Key: %s<@$$@>Request: %s<@$$@>Request_Time: %s[#@@$$@@#]" % (item[0], item[1], item[2], item[3], item[4])
+        self._connfd.send(msg.encode())
 
     def __handle_history_id(self, request_head):
         """
